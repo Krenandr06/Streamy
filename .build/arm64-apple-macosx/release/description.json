@@ -3,7 +3,34 @@
 
   ],
   "copyCommands" : {
-
+    "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy_Streamy.bundle/AppIcon.icns" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Resources/AppIcon.icns"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy_Streamy.bundle/AppIcon.icns"
+        }
+      ]
+    },
+    "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy_Streamy.bundle/icon.png" : {
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Resources/icon.png"
+        }
+      ],
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy_Streamy.bundle/icon.png"
+        }
+      ]
+    }
   },
   "explicitTargetDependencyImportCheckingMode" : {
     "none" : {
@@ -40,7 +67,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/AppPreset.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/StreamyModel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/WatchHistoryItem.swift"
         },
         {
           "kind" : "file",
@@ -48,11 +83,23 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/HomeScreenView.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/WebViewContainer.swift"
         },
         {
           "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/DerivedSources/resource_bundle_accessor.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/swift-version--58304C5D6DBC2206.txt"
+        },
+        {
+          "kind" : "virtual",
+          "name" : "<Streamy-arm64-apple-macosx16.0-release.module-resources>"
         },
         {
           "kind" : "file",
@@ -67,9 +114,13 @@
         "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/MenuBarController.swift.o",
         "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/StreamyWindowController.swift.o",
         "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/EvasionEngine.swift.o",
+        "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/AppPreset.swift.o",
         "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/StreamyModel.swift.o",
+        "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/WatchHistoryItem.swift.o",
         "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/ContentView.swift.o",
-        "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/WebViewContainer.swift.o"
+        "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/HomeScreenView.swift.o",
+        "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/WebViewContainer.swift.o",
+        "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/resource_bundle_accessor.swift.o"
       ],
       "otherArguments" : [
         "-target",
@@ -137,7 +188,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/AppPreset.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/StreamyModel.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/WatchHistoryItem.swift.o"
         },
         {
           "kind" : "file",
@@ -145,7 +204,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/HomeScreenView.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/WebViewContainer.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/resource_bundle_accessor.swift.o"
         },
         {
           "kind" : "file",
@@ -158,9 +225,13 @@
         "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Controllers/MenuBarController.swift",
         "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Controllers/StreamyWindowController.swift",
         "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Engine/EvasionEngine.swift",
+        "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/AppPreset.swift",
         "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/StreamyModel.swift",
+        "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/WatchHistoryItem.swift",
         "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/ContentView.swift",
-        "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/WebViewContainer.swift"
+        "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/HomeScreenView.swift",
+        "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/WebViewContainer.swift",
+        "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/DerivedSources/resource_bundle_accessor.swift"
       ],
       "tempsPath" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build",
       "wholeModuleOptimization" : true
@@ -184,9 +255,13 @@
       "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Controllers/MenuBarController.swift",
       "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Controllers/StreamyWindowController.swift",
       "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Engine/EvasionEngine.swift",
+      "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/AppPreset.swift",
       "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/StreamyModel.swift",
+      "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/WatchHistoryItem.swift",
       "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/ContentView.swift",
+      "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/HomeScreenView.swift",
       "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/WebViewContainer.swift",
+      "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/DerivedSources/resource_bundle_accessor.swift",
       "-I",
       "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Modules",
       "-target",
@@ -277,7 +352,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/AppPreset.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/StreamyModel.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/WatchHistoryItem.swift"
         },
         {
           "kind" : "file",
@@ -285,7 +368,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/HomeScreenView.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/WebViewContainer.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/DerivedSources/resource_bundle_accessor.swift"
         }
       ],
       "outputFilePath" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/sources"
@@ -303,11 +394,19 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/AppPreset.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/ContentView.swift.o"
         },
         {
           "kind" : "file",
           "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/EvasionEngine.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/HomeScreenView.swift.o"
         },
         {
           "kind" : "file",
@@ -323,7 +422,15 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/WatchHistoryItem.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/WebViewContainer.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/resource_bundle_accessor.swift.o"
         }
       ],
       "outputFilePath" : "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.product/Objects.LinkFileList"

@@ -2,6 +2,10 @@
 /Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Controllers/MenuBarController.swift
 /Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Controllers/StreamyWindowController.swift
 /Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Engine/EvasionEngine.swift
+/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/AppPreset.swift
 /Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/StreamyModel.swift
+/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/WatchHistoryItem.swift
 /Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/ContentView.swift
+/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/HomeScreenView.swift
 /Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/WebViewContainer.swift
+/Users/andrewkrenek/Documents/Projects/Archived/Streamy/.build/arm64-apple-macosx/release/Streamy.build/DerivedSources/resource_bundle_accessor.swift

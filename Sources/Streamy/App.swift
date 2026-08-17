@@ -12,12 +12,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let app = NSApplication.shared
         let delegate = AppDelegate()
         app.delegate = delegate
-        app.setActivationPolicy(.accessory) // Menu bar agent app mode
+        app.setActivationPolicy(.regular) // Shows Streamy icon in the macOS Dock (bottom bar) for full transparency
         app.run()
     }
     
     func applicationDidFinishLaunching(_ notification: Notification) {
         model = StreamyModel.shared
+        
+        // Dynamically load custom app icon if present in bundle or module resources
+        if let moduleURL = Bundle.module.url(forResource: "AppIcon", withExtension: "icns") ?? Bundle.module.url(forResource: "icon", withExtension: "png"),
+           let image = NSImage(contentsOf: moduleURL) {
+            NSApplication.shared.applicationIconImage = image
+        } else if let mainPath = Bundle.main.path(forResource: "AppIcon", ofType: "icns") ?? Bundle.main.path(forResource: "icon", ofType: "png"),
+                  let image = NSImage(contentsOfFile: mainPath) {
+            NSApplication.shared.applicationIconImage = image
+        }
         
         windowController = StreamyWindowController(model: model)
         menuBarController = MenuBarController(model: model, windowController: windowController)

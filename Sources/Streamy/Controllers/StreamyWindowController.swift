@@ -24,17 +24,20 @@ public final class StreamyWindowController: NSWindowController {
         panel.hasShadow = true
         panel.isMovableByWindowBackground = true
         panel.hidesOnDeactivate = false
-        
         super.init(window: panel)
         
         let contentView = ContentView(model: model) { [weak self] in
             self?.toggleFullscreenMode()
         }
         let hostingView = NSHostingView(rootView: contentView)
+        hostingView.wantsLayer = true
+        hostingView.layer?.cornerRadius = 12
+        hostingView.layer?.masksToBounds = true
         panel.contentView = hostingView
 
 
         
+        panel.delegate = self
         setupSubscriptions()
         repositionWindow(animated: false)
     }
@@ -84,6 +87,23 @@ public final class StreamyWindowController: NSWindowController {
                 }
             }
             .store(in: &cancellables)
+            
+        // Listen for HTML5 Fullscreen requests (e.g. YouTube fullscreen button)
+        NotificationCenter.default.publisher(for: NSNotification.Name("ToggleFullscreenRequested"))
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] notification in
+                guard let self = self else { return }
+                if let shouldEnter = notification.object as? Bool {
+                    if shouldEnter && !self.model.isExpanded {
+                        self.toggleFullscreenMode()
+                    } else if !shouldEnter && self.model.isExpanded {
+                        self.toggleFullscreenMode()
+                    }
+                } else {
+                    self.toggleFullscreenMode()
+                }
+            }
+            .store(in: &cancellables)
     }
     
     private func updateResizableMask(isInteracting: Bool) {
@@ -98,26 +118,33 @@ public final class StreamyWindowController: NSWindowController {
     public func toggleFullscreenMode() {
         guard let window = window else { return }
         let screen = targetScreen()
-        let screenFrame = screen.visibleFrame
         
         if model.isExpanded {
             // Collapse back to corner PIP
             model.isExpanded = false
-            repositionWindow(animated: true)
+            window.contentView?.layer?.cornerRadius = 12
+            if let preFrame = model.preExpandedFrame {
+                NSAnimationContext.runAnimationGroup { context in
+                    context.duration = 0.3
+                    context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+                    window.animator().setFrame(preFrame, display: true)
+                }
+            } else {
+                repositionWindow(animated: true)
+            }
         } else {
-            // Expand to 85% width x 90% height centered (Fullscreen mode)
+            // Store pre-expanded frame
+            model.preExpandedFrame = window.frame
             model.isExpanded = true
-            let targetWidth = screenFrame.width * 0.85
-            let targetHeight = screenFrame.height * 0.90
-            let targetX = screenFrame.minX + (screenFrame.width - targetWidth) / 2.0
-            let targetY = screenFrame.minY + (screenFrame.height - targetHeight) / 2.0
+            window.contentView?.layer?.cornerRadius = 0
             
-            let targetFrame = NSRect(x: targetX, y: targetY, width: targetWidth, height: targetHeight)
+            // Screen visible frame leaves breathing room for macOS menu bar & dock
+            let fullScreenFrame = screen.visibleFrame
             
             NSAnimationContext.runAnimationGroup { context in
                 context.duration = 0.35
                 context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                window.animator().setFrame(targetFrame, display: true)
+                window.animator().setFrame(fullScreenFrame, display: true)
             }
         }
     }
@@ -168,6 +195,10 @@ public final class StreamyWindowController: NSWindowController {
         
         let targetFrame = NSRect(x: targetX, y: targetY, width: w, height: h)
         
+        if abs(window.frame.origin.x - targetX) < 1 && abs(window.frame.origin.y - targetY) < 1 && abs(window.frame.width - w) < 1 && abs(window.frame.height - h) < 1 {
+            return
+        }
+        
         if animated {
             NSAnimationContext.runAnimationGroup { context in
                 context.duration = 0.35
@@ -185,6 +216,14 @@ public final class StreamyWindowController: NSWindowController {
         frame.size = NSSize(width: width, height: height)
         window.setFrame(frame, display: true, animate: true)
         repositionWindow(animated: true)
+    }
+    
+    public func updateGhostAlpha(alpha: Double, isGhost: Bool) {
+        guard let window = window else { return }
+        window.ignoresMouseEvents = isGhost
+        if abs(window.alphaValue - CGFloat(alpha)) > 0.01 {
+            window.alphaValue = CGFloat(alpha)
+        }
     }
     
     public func setGhostState(isGhost: Bool, alpha: Double) {
@@ -289,8 +328,26 @@ public final class StreamyWindowController: NSWindowController {
 
 }
 
+extension StreamyWindowController: NSWindowDelegate {
+    public func windowDidResize(_ notification: Notification) {
+        guard let window = window, !model.isExpanded else { return }
+        model.windowWidth = window.frame.width
+        model.windowHeight = window.frame.height
+    }
+}
+
 // Custom Panel Subclass allowing borderless key window capabilities when modifier is pressed
 private class CustomPanel: NSPanel {
     override var canBecomeKey: Bool { return true }
     override var canBecomeMain: Bool { return true }
+    
+    override func keyDown(with event: NSEvent) {
+        if event.keyCode == 53 { // ESC key
+            if let windowController = windowController as? StreamyWindowController, windowController.model.isExpanded {
+                windowController.toggleFullscreenMode()
+                return
+            }
+        }
+        super.keyDown(with: event)
+    }
 }

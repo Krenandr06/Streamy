@@ -88,7 +88,7 @@ public final class EvasionEngine {
     private func updateEvasionState(mouseLocationInScreen: NSPoint, modifierHeld: Bool) {
         guard let wc = windowController, let window = wc.window else { return }
         
-        // If window is in expanded "Theater / Queue Inspect" mode, bypass evasion completely
+        // If window is in expanded mode, bypass evasion completely
         if model.isExpanded {
             if isCurrentlyEvading {
                 isCurrentlyEvading = false
@@ -125,11 +125,36 @@ public final class EvasionEngine {
             return
         }
         
-        // Measure proximity to window frame
         let windowFrame = window.frame
+        
+        if model.evasionMode == .ghost {
+            let isInside = NSPointInRect(mouseLocationInScreen, windowFrame)
+            if isInside {
+                if !isCurrentlyEvading {
+                    isCurrentlyEvading = true
+                    model.isEvading = true
+                }
+                window.ignoresMouseEvents = true
+                window.alphaValue = 1.0
+                
+                let localPt = window.convertPoint(fromScreen: mouseLocationInScreen)
+                let swiftUIPt = CGPoint(x: localPt.x, y: windowFrame.height - localPt.y)
+                model.mousePositionInWindow = swiftUIPt
+            } else {
+                if isCurrentlyEvading {
+                    isCurrentlyEvading = false
+                    model.isEvading = false
+                    model.mousePositionInWindow = nil
+                    window.ignoresMouseEvents = false
+                    window.alphaValue = 1.0
+                }
+            }
+            return
+        }
+        
+        // Other Evasion Modes (.slide, .peek)
         let buffer = model.evasionDistance
         let expandedFrame = windowFrame.insetBy(dx: -buffer, dy: -buffer)
-        
         let isMouseNear = NSPointInRect(mouseLocationInScreen, expandedFrame)
         
         if isMouseNear {
@@ -138,14 +163,12 @@ public final class EvasionEngine {
                 model.isEvading = true
                 
                 switch model.evasionMode {
-                case .ghost:
-                    wc.setGhostState(isGhost: true, alpha: model.ghostOpacity)
                 case .slide:
                     wc.setSlideState(isEvading: true)
                 case .peek:
                     wc.setPeekState(isEvading: true)
-                case .disabled:
-                    wc.setGhostState(isGhost: false, alpha: 1.0)
+                default:
+                    break
                 }
             }
         } else {
@@ -154,18 +177,20 @@ public final class EvasionEngine {
                 model.isEvading = false
                 
                 switch model.evasionMode {
-                case .ghost:
-                    wc.setGhostState(isGhost: false, alpha: 1.0)
                 case .slide:
                     wc.setSlideState(isEvading: false)
                 case .peek:
                     wc.setPeekState(isEvading: false)
-                case .disabled:
-                    wc.setGhostState(isGhost: false, alpha: 1.0)
+                default:
+                    break
                 }
             }
         }
-
     }
-
+    
+    private func distanceToRect(point: NSPoint, rect: NSRect) -> CGFloat {
+        let dx = max(rect.minX - point.x, 0, point.x - rect.maxX)
+        let dy = max(rect.minY - point.y, 0, point.y - rect.maxY)
+        return sqrt(dx * dx + dy * dy)
+    }
 }

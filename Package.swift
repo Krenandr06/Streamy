@@ -12,7 +12,10 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "Streamy",
-            path: "Sources/Streamy"
+            path: "Sources/Streamy",
+            resources: [
+                .process("Resources")
+            ]
         )
     ]
 )

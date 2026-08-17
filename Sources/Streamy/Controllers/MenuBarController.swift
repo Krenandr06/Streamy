@@ -37,6 +37,11 @@ public final class MenuBarController: NSObject, NSMenuDelegate {
         menu.addItem(headerItem)
         menu.addItem(NSMenuItem.separator())
         
+        // Go to Home Screen
+        let homeItem = NSMenuItem(title: "Go to Home Screen", action: #selector(goToHomeScreen), keyEquivalent: "H")
+        homeItem.target = self
+        menu.addItem(homeItem)
+        
         // Open URL...
         let openURLItem = NSMenuItem(title: "Open Web URL...", action: #selector(promptForURL), keyEquivalent: "u")
         openURLItem.target = self
@@ -148,7 +153,7 @@ public final class MenuBarController: NSObject, NSMenuDelegate {
         menu.addItem(followDisplayItem)
         
         // Fullscreen toggle
-        let expandItem = NSMenuItem(title: "Fullscreen (85%×90%)", action: #selector(toggleFullscreen), keyEquivalent: "f")
+        let expandItem = NSMenuItem(title: "Fullscreen (100% Screen)", action: #selector(toggleFullscreen), keyEquivalent: "f")
         expandItem.target = self
         expandItem.state = model.isExpanded ? .on : .off
         menu.addItem(expandItem)
@@ -174,6 +179,14 @@ public final class MenuBarController: NSObject, NSMenuDelegate {
         menu.addItem(quitItem)
         
         statusItem?.menu = menu
+    }
+    
+    @objc private func goToHomeScreen() {
+        model.isHomeScreenActive = true
+        if let window = windowController?.window {
+            window.makeKeyAndOrderFront(nil)
+        }
+        rebuildMenu()
     }
     
     @objc private func promptForURL() {
