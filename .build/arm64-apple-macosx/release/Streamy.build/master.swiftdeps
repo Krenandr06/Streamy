@@ -1,0 +1,12 @@
+version: "Apple Swift version 6.1.2 (swiftlang-6.1.2.1.2 clang-1700.0.13.5)"
+options: "711b8a6b1fb640365d49ec43514dfd30caaeb146214524fb55af45ccd762027c"
+build_start_time: [1786978874, 714000]
+build_end_time: [1786978883, 308400000]
+inputs:
+  "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/App.swift": [1786977851, 429444147]
+  "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Controllers/MenuBarController.swift": [1786978396, 462607037]
+  "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Controllers/StreamyWindowController.swift": [1786978393, 543157788]
+  "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Engine/EvasionEngine.swift": [1786978390, 81978065]
+  "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Models/StreamyModel.swift": [1786978384, 615044504]
+  "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/ContentView.swift": [1786978392, 450041832]
+  "/Users/andrewkrenek/Documents/Projects/Archived/Streamy/Sources/Streamy/Views/WebViewContainer.swift": [1786978440, 195746782]
