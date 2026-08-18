@@ -1,0 +1,21 @@
+# macOS System Files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Swift Package Manager & Xcode Build Products
+.build/
+.swiftpm/
+Packages/
+Package.pins
+/*.xcodeproj
+/*.xcworkspace
+*.xcuserdata/
+DerivedData/
+
+# Binary / Distribution Artifacts (produced by package.sh)
+*.zip
+/*.app/

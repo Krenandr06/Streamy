@@ -91,6 +91,7 @@ public final class StreamyModel: ObservableObject {
     @Published public var isInteracting: Bool = false
     @Published public var isEvading: Bool = false
     @Published public var isExpanded: Bool = false
+    @Published public var isUserDraggingWindow: Bool = false
     @Published public var mousePositionInWindow: CGPoint? = nil
     public var preExpandedSize: NSSize?
     public var preExpandedFrame: NSRect?

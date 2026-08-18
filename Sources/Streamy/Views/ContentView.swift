@@ -55,7 +55,7 @@ public struct ContentView: View {
             
             
             // Action Overlay Buttons (Home & Fullscreen controls)
-            if model.isInteracting || model.isExpanded || model.isHomeScreenActive {
+            if isShowingOverlay && model.isInteracting {
                 VStack {
                     if innerCornerAlignment == .bottomLeading || innerCornerAlignment == .bottomTrailing {
                         Spacer()
@@ -129,6 +129,7 @@ public struct ContentView: View {
                     }
                 }
                 .transition(.opacity)
+                .animation(.easeInOut(duration: 0.2), value: isShowingOverlay && model.isInteracting)
             }
         }
         }

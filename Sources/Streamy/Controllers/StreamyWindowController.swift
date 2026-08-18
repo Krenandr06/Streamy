@@ -6,6 +6,13 @@ public final class StreamyWindowController: NSWindowController {
     public let model: StreamyModel
     private var cancellables = Set<AnyCancellable>()
     private var currentTargetScreen: NSScreen?
+
+    // Set for the duration of any frame change WE initiate, so the NSWindowDelegate
+    // callbacks below can tell "the user moved/resized this" apart from "we did it
+    // ourselves" and only feed genuine user actions back into the model. Without this,
+    // our own animated repositioning was mistaken for user input, which fed back into
+    // the model and re-triggered another reposition — a self-sustaining jitter loop.
+    private var isProgrammaticFrameUpdate: Bool = false
     
     public init(model: StreamyModel) {
         self.model = model
@@ -124,11 +131,7 @@ public final class StreamyWindowController: NSWindowController {
             model.isExpanded = false
             window.contentView?.layer?.cornerRadius = 12
             if let preFrame = model.preExpandedFrame {
-                NSAnimationContext.runAnimationGroup { context in
-                    context.duration = 0.3
-                    context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                    window.animator().setFrame(preFrame, display: true)
-                }
+                setProgrammaticFrame(preFrame, on: window, animated: true, timingFunction: .easeInEaseOut, duration: 0.3)
             } else {
                 repositionWindow(animated: true)
             }
@@ -137,15 +140,10 @@ public final class StreamyWindowController: NSWindowController {
             model.preExpandedFrame = window.frame
             model.isExpanded = true
             window.contentView?.layer?.cornerRadius = 0
-            
+
             // Screen visible frame leaves breathing room for macOS menu bar & dock
             let fullScreenFrame = screen.visibleFrame
-            
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.35
-                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                window.animator().setFrame(fullScreenFrame, display: true)
-            }
+            setProgrammaticFrame(fullScreenFrame, on: window, animated: true, timingFunction: .easeInEaseOut)
         }
     }
 
@@ -164,12 +162,8 @@ public final class StreamyWindowController: NSWindowController {
         return currentTargetScreen ?? NSScreen.main ?? NSScreen.screens.first!
     }
     
-    public func repositionWindow(animated: Bool = true, screen: NSScreen? = nil) {
-        guard let window = window else { return }
-        
+    public func basePinnedFrame(for screen: NSScreen? = nil) -> NSRect {
         let activeScreen = screen ?? targetScreen()
-        self.currentTargetScreen = activeScreen
-        
         let screenFrame = activeScreen.visibleFrame
         let padding: CGFloat = 20.0
         let w = model.windowWidth
@@ -193,29 +187,50 @@ public final class StreamyWindowController: NSWindowController {
             targetY = screenFrame.minY + padding
         }
         
-        let targetFrame = NSRect(x: targetX, y: targetY, width: w, height: h)
-        
-        if abs(window.frame.origin.x - targetX) < 1 && abs(window.frame.origin.y - targetY) < 1 && abs(window.frame.width - w) < 1 && abs(window.frame.height - h) < 1 {
-            return
-        }
-        
-        if animated {
-            NSAnimationContext.runAnimationGroup { context in
-                context.duration = 0.35
-                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-                window.animator().setFrame(targetFrame, display: true)
-            }
-        } else {
-            window.setFrame(targetFrame, display: true)
-        }
+        return NSRect(x: targetX, y: targetY, width: w, height: h)
     }
     
-    public func updateWindowSize(width: CGFloat, height: CGFloat) {
+    public func repositionWindow(animated: Bool = true, screen: NSScreen? = nil) {
         guard let window = window else { return }
-        var frame = window.frame
-        frame.size = NSSize(width: width, height: height)
-        window.setFrame(frame, display: true, animate: true)
+        guard !model.isExpanded, !model.isUserDraggingWindow, window.inLiveResize == false else { return }
+
+        let activeScreen = screen ?? targetScreen()
+        self.currentTargetScreen = activeScreen
+
+        let targetFrame = basePinnedFrame(for: activeScreen)
+
+        if abs(window.frame.origin.x - targetFrame.origin.x) < 1 && abs(window.frame.origin.y - targetFrame.origin.y) < 1 && abs(window.frame.width - targetFrame.width) < 1 && abs(window.frame.height - targetFrame.height) < 1 {
+            return
+        }
+
+        setProgrammaticFrame(targetFrame, on: window, animated: animated, timingFunction: .easeInEaseOut)
+    }
+
+    // Sizing is model-driven (menu presets, persisted defaults) but the on-screen home
+    // position always depends on the current size + pinned corner, so just recompute
+    // and animate straight to that combined frame in one pass. Doing a separate resize
+    // animation first (as this used to) collides with the reposition animation right
+    // after it and shows up as a visible double-jump.
+    public func updateWindowSize(width: CGFloat, height: CGFloat) {
         repositionWindow(animated: true)
+    }
+
+    // Runs a single programmatic frame change, flagging it so the NSWindowDelegate
+    // callbacks below know not to treat it as user input.
+    private func setProgrammaticFrame(_ frame: NSRect, on window: NSWindow, animated: Bool, timingFunction name: CAMediaTimingFunctionName, duration: CFTimeInterval = 0.35) {
+        isProgrammaticFrameUpdate = true
+        if animated {
+            NSAnimationContext.runAnimationGroup({ context in
+                context.duration = duration
+                context.timingFunction = CAMediaTimingFunction(name: name)
+                window.animator().setFrame(frame, display: true)
+            }, completionHandler: { [weak self] in
+                self?.isProgrammaticFrameUpdate = false
+            })
+        } else {
+            window.setFrame(frame, display: true)
+            isProgrammaticFrameUpdate = false
+        }
     }
     
     public func updateGhostAlpha(alpha: Double, isGhost: Bool) {
@@ -246,6 +261,7 @@ public final class StreamyWindowController: NSWindowController {
     
     public func setSlideState(isEvading: Bool) {
         guard let window = window else { return }
+        guard !model.isExpanded, !model.isUserDraggingWindow else { return }
         guard isEvading else {
             repositionWindow(animated: true)
             return
@@ -285,16 +301,17 @@ public final class StreamyWindowController: NSWindowController {
         }
         
         let targetFrame = NSRect(x: targetX, y: targetY, width: w, height: h)
-        
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.35
-            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
-            window.animator().setFrame(targetFrame, display: true)
+
+        if abs(window.frame.origin.x - targetFrame.origin.x) < 1 && abs(window.frame.origin.y - targetFrame.origin.y) < 1 {
+            return
         }
+
+        setProgrammaticFrame(targetFrame, on: window, animated: true, timingFunction: .easeOut)
     }
-    
+
     public func setPeekState(isEvading: Bool) {
         guard let window = window else { return }
+        guard !model.isExpanded, !model.isUserDraggingWindow else { return }
         guard isEvading else {
             repositionWindow(animated: true)
             return
@@ -318,21 +335,65 @@ public final class StreamyWindowController: NSWindowController {
         }
         
         let targetFrame = NSRect(x: targetX, y: currentFrame.origin.y, width: w, height: currentFrame.height)
-        
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.35
-            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            window.animator().setFrame(targetFrame, display: true)
+
+        if abs(window.frame.origin.x - targetFrame.origin.x) < 1 && abs(window.frame.origin.y - targetFrame.origin.y) < 1 {
+            return
         }
+
+        setProgrammaticFrame(targetFrame, on: window, animated: true, timingFunction: .easeInEaseOut)
     }
 
 }
 
 extension StreamyWindowController: NSWindowDelegate {
-    public func windowDidResize(_ notification: Notification) {
+    // NSWindow sends will/did-move and did-resize for ANY frame change, including the
+    // ones this controller makes itself (repositionWindow, setSlideState, etc). Bailing
+    // out while isProgrammaticFrameUpdate is set is what keeps those from being read
+    // back as user input and re-triggering another reposition.
+    public func windowWillMove(_ notification: Notification) {
+        guard !isProgrammaticFrameUpdate else { return }
+        model.isUserDraggingWindow = true
+    }
+
+    public func windowDidMove(_ notification: Notification) {
+        guard !isProgrammaticFrameUpdate else { return }
+        model.isUserDraggingWindow = false
+
         guard let window = window, !model.isExpanded else { return }
-        model.windowWidth = window.frame.width
-        model.windowHeight = window.frame.height
+
+        let activeScreen = targetScreen()
+        let screenFrame = activeScreen.visibleFrame
+        let windowCenter = NSPoint(x: window.frame.midX, y: window.frame.midY)
+        let isRight = windowCenter.x > screenFrame.midX
+        let isTop = windowCenter.y > screenFrame.midY
+
+        let newCorner: CornerPosition
+        switch (isTop, isRight) {
+        case (true, true): newCorner = .topRight
+        case (true, false): newCorner = .topLeft
+        case (false, true): newCorner = .bottomRight
+        case (false, false): newCorner = .bottomLeft
+        }
+
+        if model.pinnedCorner != newCorner {
+            model.pinnedCorner = newCorner
+        }
+    }
+
+    public func windowDidResize(_ notification: Notification) {
+        guard !isProgrammaticFrameUpdate else { return }
+        guard let window = window, !model.isExpanded, !model.isUserDraggingWindow else { return }
+        if abs(model.windowWidth - window.frame.width) > 1 || abs(model.windowHeight - window.frame.height) > 1 {
+            model.windowWidth = window.frame.width
+            model.windowHeight = window.frame.height
+        }
+    }
+
+    // repositionWindow skips while the user is actively dragging a resize handle (so it
+    // doesn't fight their live drag); once they let go, snap back into the pinned
+    // corner at the new size.
+    public func windowDidEndLiveResize(_ notification: Notification) {
+        repositionWindow(animated: true)
     }
 }
 

@@ -12,6 +12,7 @@ public final class EvasionEngine {
     
     private var lastActiveScreen: NSScreen?
     private var isCurrentlyEvading: Bool = false
+    private var isDispatchPending: Bool = false
     
     public init(model: StreamyModel, windowController: StreamyWindowController) {
         self.model = model
@@ -55,22 +56,31 @@ public final class EvasionEngine {
     }
     
     private func handleFlagsChanged(_ flags: NSEvent.ModifierFlags) {
+        guard !model.isUserDraggingWindow else { return }
         let isPressed = flags.contains(model.modifierKey.eventFlag)
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.model.isInteracting = isPressed
-            
+            if self.model.isInteracting != isPressed {
+                self.model.isInteracting = isPressed
+            }
+
             // Re-evaluate mouse position with new modifier key state
             self.updateEvasionState(mouseLocationInScreen: NSEvent.mouseLocation, modifierHeld: isPressed)
         }
     }
     
     private func handleMouseMoved(_ location: NSPoint) {
+        guard !model.isUserDraggingWindow else { return }
+        guard !isDispatchPending else { return }
+        isDispatchPending = true
+        
         let screenMouseLocation = NSEvent.mouseLocation
         let modifierHeld = NSEvent.modifierFlags.contains(model.modifierKey.eventFlag)
         
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
+            self.isDispatchPending = false
+            guard !self.model.isUserDraggingWindow else { return }
             
             // Check display change
             if self.model.followActiveScreen, let wc = self.windowController {
@@ -87,6 +97,7 @@ public final class EvasionEngine {
     
     private func updateEvasionState(mouseLocationInScreen: NSPoint, modifierHeld: Bool) {
         guard let wc = windowController, let window = wc.window else { return }
+        guard !model.isUserDraggingWindow else { return }
         
         // If window is in expanded mode, bypass evasion completely
         if model.isExpanded {
@@ -100,7 +111,7 @@ public final class EvasionEngine {
         
         // If modifier key is held, ALWAYS allow direct interaction & never evade
         if modifierHeld {
-            model.isInteracting = true
+            if !model.isInteracting { model.isInteracting = true }
             if isCurrentlyEvading {
                 isCurrentlyEvading = false
                 model.isEvading = false
@@ -112,8 +123,8 @@ public final class EvasionEngine {
             return
         }
         
-        model.isInteracting = false
-        
+        if model.isInteracting { model.isInteracting = false }
+
         // If evasion is disabled, make sure ghost/slide state is reset
         if model.evasionMode == .disabled {
             if isCurrentlyEvading {
@@ -153,9 +164,10 @@ public final class EvasionEngine {
         }
         
         // Other Evasion Modes (.slide, .peek)
+        let homeFrame = wc.basePinnedFrame()
         let buffer = model.evasionDistance
-        let expandedFrame = windowFrame.insetBy(dx: -buffer, dy: -buffer)
-        let isMouseNear = NSPointInRect(mouseLocationInScreen, expandedFrame)
+        let expandedHomeFrame = homeFrame.insetBy(dx: -buffer, dy: -buffer)
+        let isMouseNear = NSPointInRect(mouseLocationInScreen, expandedHomeFrame)
         
         if isMouseNear {
             if !isCurrentlyEvading {
