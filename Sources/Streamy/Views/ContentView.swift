@@ -43,13 +43,19 @@ public struct ContentView: View {
             
             ZStack {
                 Color.black
-                
+
+                // Kept mounted at all times (instead of an if/else) so switching to the
+                // Home screen and back doesn't tear down the WKWebView — that used to
+                // force a full page reload and drop playback position every time.
+                WebViewContainer(model: model)
+                    .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                    .opacity(model.isHomeScreenActive ? 0 : 1)
+                    .allowsHitTesting(!model.isHomeScreenActive)
+
                 if model.isHomeScreenActive {
                     HomeScreenView(model: model)
                         .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
-                } else {
-                    WebViewContainer(model: model)
-                        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+                        .transition(.identity)
                 }
             
             

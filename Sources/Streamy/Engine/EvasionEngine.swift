@@ -144,6 +144,12 @@ public final class EvasionEngine {
                 if !isCurrentlyEvading {
                     isCurrentlyEvading = true
                     model.isEvading = true
+
+                    // The window is about to stop receiving mouse events entirely, so the
+                    // page will never see the cursor leave on its own — force-clear whatever
+                    // it's currently showing on hover (e.g. a player's control bar) now,
+                    // while we can still reach it.
+                    NowPlayingController.shared.webView?.evaluateJavaScript("window.streamyClearHover && window.streamyClearHover()")
                 }
                 window.ignoresMouseEvents = true
                 window.alphaValue = 1.0

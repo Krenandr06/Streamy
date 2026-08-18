@@ -106,11 +106,54 @@ public struct WebViewContainer: NSViewRepresentable {
                     if (!document.webkitExitFullscreen) {
                         document.webkitExitFullscreen = document.exitFullscreen;
                     }
+
+                    // Media key / Now Playing support: relay the active <video>'s play/pause
+                    // state to native, and expose a way for native to drive it back.
+                    window.streamyMediaControl = function(action) {
+                        var v = document.querySelector('video');
+                        if (!v) return;
+                        if (action === 'play') v.play();
+                        else if (action === 'pause') v.pause();
+                        else if (action === 'toggle') { v.paused ? v.play() : v.pause(); }
+                    };
+
+                    function streamyAttachMediaSession(video) {
+                        if (!video || video.__streamyBound) return;
+                        video.__streamyBound = true;
+                        var post = function(state) {
+                            try { window.webkit.messageHandlers.streamyPlayback.postMessage(state); } catch(e) {}
+                        };
+                        video.addEventListener('play', function() { post('play'); });
+                        video.addEventListener('pause', function() { post('pause'); });
+                        video.addEventListener('ended', function() { post('pause'); });
+                    }
+
+                    // Polls at a low rate rather than a MutationObserver, since sites like
+                    // YouTube swap the <video> element on SPA navigation and ad breaks.
+                    setInterval(function() {
+                        streamyAttachMediaSession(document.querySelector('video'));
+                    }, 2000);
+
+                    // Ghost mode makes the window click-through so events stop reaching the
+                    // page entirely — the page never sees the cursor leave, so anything shown
+                    // on hover (e.g. a player's control bar) gets stuck visible. Native calls
+                    // this the instant click-through engages, to force those elements closed.
+                    window.streamyClearHover = function() {
+                        try {
+                            var hovered = document.querySelectorAll(':hover');
+                            for (var i = hovered.length - 1; i >= 0; i--) {
+                                var el = hovered[i];
+                                el.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false, cancelable: true }));
+                                el.dispatchEvent(new MouseEvent('mouseout', { bubbles: true, cancelable: true }));
+                            }
+                        } catch(e) {}
+                    };
                 } catch(e) {}
             })();
         """
         let userScript = WKUserScript(source: js, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
         contentController.addUserScript(userScript)
+        contentController.add(context.coordinator, name: "streamyPlayback")
         configuration.userContentController = contentController
         
         let webView = WKWebView(frame: .zero, configuration: configuration)
@@ -129,6 +172,7 @@ public struct WebViewContainer: NSViewRepresentable {
         }
         
         context.coordinator.webView = webView
+        NowPlayingController.shared.webView = webView
         return webView
     }
     
@@ -156,16 +200,16 @@ public struct WebViewContainer: NSViewRepresentable {
         return "https://www.youtube.com"
     }
     
-    public class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
+    public class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
         var parent: WebViewContainer
         var currentLoadedURL: String = ""
         weak var webView: WKWebView?
-        
+
         init(_ parent: WebViewContainer) {
             self.parent = parent
             self.currentLoadedURL = parent.model.currentURL
         }
-        
+
         public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             if let urlString = webView.url?.absoluteString {
                 let pageTitle = webView.title ?? ""
@@ -175,16 +219,22 @@ public struct WebViewContainer: NSViewRepresentable {
                         self.currentLoadedURL = urlString
                     }
                     self.parent.model.recordWatchHistory(title: pageTitle, urlString: urlString)
+                    NowPlayingController.shared.updateTitle(pageTitle)
                 }
             }
         }
-        
+
         public func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
             // Open target=_blank in same webview
             if navigationAction.targetFrame == nil {
                 webView.load(navigationAction.request)
             }
             return nil
+        }
+
+        public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+            guard message.name == "streamyPlayback", let state = message.body as? String else { return }
+            NowPlayingController.shared.updatePlaybackState(isPlaying: state == "play")
         }
     }
 }
