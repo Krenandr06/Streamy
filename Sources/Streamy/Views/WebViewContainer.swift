@@ -224,6 +224,15 @@ public struct WebViewContainer: NSViewRepresentable {
             }
         }
 
+        public func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
+            // Streamy is a viewer, not a place pages should be uploading files from — and
+            // if this delegate method isn't implemented, WKWebView falls back to showing
+            // its own native NSOpenPanel, which is what triggers macOS's Desktop/Documents/
+            // Downloads folder-access prompt the moment any page has a file input. Declining
+            // outright means that panel can never appear in the first place.
+            completionHandler(nil)
+        }
+
         public func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
             // Open target=_blank in same webview
             if navigationAction.targetFrame == nil {
